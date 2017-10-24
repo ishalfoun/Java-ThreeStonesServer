@@ -59,10 +59,16 @@ public class ThreeStonesBoard {
         return playableSlot;
     }
     
-    public void placeStone(Stone stone) {
+    public boolean placeStone(Stone stone) {
+        
         if(board[stone.getX()][stone.getY()].isPlayable()){
             Slot slot = (Slot) board[stone.getX()][stone.getY()];
-            slot.placeStone(stone);
+            if(!slot.hasStone()){
+                slot.placeStone(stone);
+                return true;
+            }
         }
+        
+        return false;
     }
 }

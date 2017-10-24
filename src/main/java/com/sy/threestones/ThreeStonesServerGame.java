@@ -1,7 +1,10 @@
 package com.sy.threestones;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -9,35 +12,84 @@ import java.util.List;
  */
 public class ThreeStonesServerGame {
     
-    ThreeStonesPacket packet;
-    ThreeStonesBoard board;
+    private final Logger log = LoggerFactory.getLogger(
+            this.getClass().getName());
+    
+//    private ThreeStonesPacket packet;
+//    IsaakServerSession session;
+    private ThreeStonesBoard board;
+//    boolean gameRunning;
+//    Stone playerStone;
+//    Stone compStone;
+    
+    private List<Stone> stones;
+    
+    private ArrayList<Object> receivedPacket;
+    
+//    public ThreeStonesServerGame(IsaakServerSession i) {
+////        packet = new ThreeStonesPacket();
+//        board = new ThreeStonesBoard(11);
+//        stones = new ArrayList<>();
+//        session = i;
+//        gameRunning=true;
+//    }
     
     public ThreeStonesServerGame() {
-        packet = new ThreeStonesPacket();
+        board = new ThreeStonesBoard(11);
+        stones = new ArrayList<>();
     }
     
-    public void playGame() {        
-        ThreeStonesBoard board = new ThreeStonesBoard(11);
-        List<Stone> stones = new ArrayList<>();
+//    public void playGame() throws IOException, Exception
+//    {
+//        while (stones.size() < 15)
+//        {
+//            receivedPacket = session.receivePacket(); //receive Handshake packet
+//            if (receivedPacket.get(1) == Opcode.CLIENT_PLACE)
+//            {
+//                Stone playerStone = (Stone)receivedPacket.get(0);
+//                playerStone.setType(PlayerType.PLAYER);
+//                if(!board.placeStone(playerStone)){
+//                    // stone not placed
+//                }
+//                Stone compStone = determineNextMove(board.getPlayableSlot(playerStone));
+//                compStone.setType(PlayerType.COMPUTER);
+//                board.placeStone(compStone);
+//
+//                stones.add(compStone);
+//                session.sendPacket(compStone, Opcode.SERVER_PLACE);
+//            }
+////            else
+//            //log: Did not receive CLIENT_PLACE");
+//         }
+//        //dispay: game finished!!
+//    }
+    
+    public void playGame(ThreeStonesPacket packet) throws IOException {        
+
+        log.info("Server Game - playGame");
         
         while(stones.size() < 15){
-            Stone playerStone = packet.receivePacket();
+            Stone playerStone = packet.getStone();
             playerStone.setType(PlayerType.PLAYER);
-            board.placeStone(playerStone);
+            if(!board.placeStone(playerStone)) {
+                packet.sendPacket(null, Opcode.NOT_VALID_PLACE);
+                continue;
+            }
             
             Stone stone = determineNextMove(board.getPlayableSlot(playerStone));
             stone.setType(PlayerType.COMPUTER);
-            board.placeStone(stone);
-//            slot.placeStone();
-//            board.placeStone(computerStone);
-            
-//            stones.add(computerStone);
-//            
-//            packet.sendPacket(computerStone);
+            if(board.placeStone(stone)) {
+                packet.sendPacket(stone, Opcode.SERVER_PLACE);
+                stones.add(stone);
+            }
         }
+        
+        packet.sendPacket(null, Opcode.REQ_PLAY_AGAIN);
     }
     
     public Stone determineNextMove(List<Tile> playableTiles) {
+        log.info("Server Game - determineNextMove");
+        
         Stone stone =  null;
         
         int point = 0;
@@ -56,6 +108,7 @@ public class ThreeStonesServerGame {
             stone.setType(PlayerType.COMPUTER);
         }
         
+        log.info("nextMove : " + stone.toString());
         return stone;
     } 
     

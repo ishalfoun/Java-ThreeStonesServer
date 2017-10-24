@@ -2,6 +2,8 @@ package com.sy.threestones;
 
 import java.io.IOException;
 import java.net.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -9,17 +11,20 @@ import java.net.*;
  */
 public class ThreeStonesServer {
     
+    private final Logger log = LoggerFactory.getLogger(
+            this.getClass().getName());
+    
+    private final int PORTNUM = 9999;
+    
     public void runServer()throws IOException  {
-        int portNum = 7;
-        ServerSocket ss = new ServerSocket(portNum); 
-        System.out.println("the server port number is" + portNum);
-        while(true){
+        log.info("runServer");
+        ServerSocket ss = new ServerSocket(PORTNUM); 
+        while(true) {
             Socket cs = ss.accept();
-            ThreeStonesServerSession threeStonesServerSession = new ThreeStonesServerSession(cs);
-            threeStonesServerSession.playSession();
+            log.info("accept client connection");
+            ThreeStonesServerSession session = new ThreeStonesServerSession(cs);
+//            IsaakServerSession threeStonesServerSession = new IsaakServerSession(ss);
+            session.playSession();
         }
-        // TODO : infinite loop until the socket accept
-        // then create ThreeStonesSession(Socket)
-        // then call the playSession() on the ThreeStonesSession object
     }
 }
