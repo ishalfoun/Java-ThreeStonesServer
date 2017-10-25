@@ -39,4 +39,11 @@ public class Slot extends Tile {
     public boolean hasStone() {
         return stone != null;
     }
+
+    @Override
+    public String toString() {
+        return "Slot{" + "x=" + x + ", y=" + y +", stone=" + stone + '}';
+    }
+    
+    
 }

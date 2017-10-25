@@ -17,6 +17,9 @@ public class ThreeStonesPacket {
     OutputStream out;
     byte[] receiveByte;
     
+    Opcode opcode;
+    Stone stone;
+    
     //constructor
     public ThreeStonesPacket(Socket socket) {    
         
@@ -49,6 +52,11 @@ public class ThreeStonesPacket {
                 byteBuffer = new byte[]{(byte)Opcode.REQ_PLAY_AGAIN.getValue(), 0b0, 0b0, 0b0};
                 break;   
             }
+            case NOT_VALID_PLACE:
+            {
+                byteBuffer = new byte[]{(byte)Opcode.NOT_VALID_PLACE.getValue(), 0b0, 0b0, 0b0};
+                break;
+            }
             default:
                 throw new IllegalArgumentException();
                 // TODO: add code here
@@ -58,26 +66,34 @@ public class ThreeStonesPacket {
     }
         
     public void receivePacket() throws IOException {
-        
+        log.info("receive packet");
+                
+//        receiveByte = new byte[4];
         int totalBytesRcvd = 0;      // Total bytes received so far
         int bytesRcvd;        // Bytes received in last read
         
         while (totalBytesRcvd < receiveByte.length) {
           if ( (bytesRcvd = in.read(receiveByte, totalBytesRcvd, receiveByte.length - totalBytesRcvd)) == -1)
             throw new SocketException("Connection closed prematurely");
-          totalBytesRcvd += bytesRcvd;
+            totalBytesRcvd += bytesRcvd;
+            log.debug("totalByteRcvd : " + totalBytesRcvd);
         }   
+        
+//        opcode = Opcode.values()[(int) receiveByte[0]];
+//        
+//        log.debug("opcode " + opcode.name());
+//        
+//        int x = (int) receiveByte[1];
+//        int y = (int) receiveByte[2];
+//        stone = new Stone(x, y, PlayerType.PLAYER);        
     }
     
-    public Stone getStone() {
-        
+    public Stone getStone() throws IOException {
+//        this.receivePacket();
         int x = (int) receiveByte[1];
         int y = (int) receiveByte[2];
         
         Stone stone = new Stone(x, y, PlayerType.PLAYER);
-        
-        log.info("Stone : " + stone.toString());
-        
         return stone;
     }
     
@@ -92,8 +108,11 @@ public class ThreeStonesPacket {
         Opcode opcode = Opcode.values()[(int) receiveByte[0]];
         
         log.info("Opcode canGameStart : " + opcode.name());
+//        if(opcode == Opcode.)
         if(opcode == Opcode.REQ_GAME_START) {
             this.sendPacket(null, Opcode.ACK_GAME_START);
+//            this.receivePacket();
+            
             return true;
         }
         
@@ -101,8 +120,8 @@ public class ThreeStonesPacket {
     }
     
     public boolean playAgain() {
-        Opcode opcode = Opcode.values()[ (int) receiveByte[0]];
-        log.info("Opcode playAgain : " + opcode.name());
+//        Opcode opcode = Opcode.values()[ (int) receiveByte[0]];
+//        log.info("Opcode playAgain : " + opcode.name());
         return opcode == Opcode.ACK_PLAY_AGAIN;
     }
 }

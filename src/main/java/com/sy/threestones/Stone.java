@@ -39,4 +39,11 @@ public class Stone extends Tile {
     public boolean hasStone() {
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "Stone{" + "x=" + x + ", y=" + y + ", type=" + type + '}';
+    }
+    
+    
 }

@@ -36,6 +36,7 @@ public class ThreeStonesServerGame {
     
     public ThreeStonesServerGame() {
         board = new ThreeStonesBoard(11);
+        board.fillBoardFromCSV("src/main/resources/board.csv");
         stones = new ArrayList<>();
     }
     
@@ -68,15 +69,29 @@ public class ThreeStonesServerGame {
 
         log.info("Server Game - playGame");
         
+//        Stone previousStone = null;
         while(stones.size() < 15){
+            packet.receivePacket();
             Stone playerStone = packet.getStone();
             playerStone.setType(PlayerType.PLAYER);
-            if(!board.placeStone(playerStone)) {
+            
+            log.info("playerStone : " + playerStone.toString());
+            
+            List<Tile> playerPlayableSlots = new ArrayList<>();
+            if(stones.size() > 0)
+                playerPlayableSlots = board.getPlayableSlot(stones.get(stones.size() - 1));
+            
+            for(Tile t : playerPlayableSlots) {             
+                log.debug("Player playable slots : " + t.toString());   
+            }
+            
+            if(!board.placeStone(playerStone) || !isInPlayableSlots(playerPlayableSlots, playerStone)) {
                 packet.sendPacket(null, Opcode.NOT_VALID_PLACE);
                 continue;
             }
             
-            Stone stone = determineNextMove(board.getPlayableSlot(playerStone));
+            List<Tile> computerPlayableSlots = board.getPlayableSlot(playerStone);
+            Stone stone = determineNextMove(computerPlayableSlots);
             stone.setType(PlayerType.COMPUTER);
             if(board.placeStone(stone)) {
                 packet.sendPacket(stone, Opcode.SERVER_PLACE);
@@ -85,6 +100,18 @@ public class ThreeStonesServerGame {
         }
         
         packet.sendPacket(null, Opcode.REQ_PLAY_AGAIN);
+    }
+    
+    private boolean isInPlayableSlots(List<Tile> playableSlots, Stone stone) {
+        if(playableSlots.size() == 0) 
+            return true;
+        
+        for(Tile tile : playableSlots) {
+            if(stone.getX() == tile.getX() && stone.getY() == tile.getY())
+                return true;
+        }
+        
+        return false;
     }
     
     public Stone determineNextMove(List<Tile> playableTiles) {
@@ -97,15 +124,17 @@ public class ThreeStonesServerGame {
             int newPoint = countPointForAPosition(tile, PlayerType.COMPUTER);
             if(newPoint > point){                 
                 point = newPoint;
-                stone = (Stone) tile;
-                stone.setType(PlayerType.COMPUTER);
+                Slot slot = (Slot) tile;
+//                stone = (Stone) tile;
+                stone = new Stone(slot.getX(), slot.getY(), PlayerType.COMPUTER);
             }            
         }
         
         if(point == 0) {
             int random = (int) (Math.random() * playableTiles.size());
-            stone = (Stone) playableTiles.get(random);
-            stone.setType(PlayerType.COMPUTER);
+            Slot slot = (Slot) playableTiles.get(random);
+            stone = new Stone(slot.getX(), slot.getY(), PlayerType.COMPUTER);
+//            stone.setType(PlayerType.COMPUTER);
         }
         
         log.info("nextMove : " + stone.toString());

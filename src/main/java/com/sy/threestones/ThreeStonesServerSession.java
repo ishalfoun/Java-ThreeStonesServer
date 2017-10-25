@@ -24,6 +24,7 @@ public class ThreeStonesServerSession {
     public void playSession() throws IOException {
         log.info("playSession");
         
+
         if(packet.canGameStart()) {
             log.info("packet : " + packet.getOpcode());
             

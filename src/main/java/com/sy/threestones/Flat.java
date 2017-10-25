@@ -24,4 +24,11 @@ public class Flat extends Tile{
     public boolean hasStone() {
         return false;
     }
+
+    @Override
+    public String toString() {
+        return "Flat{" + "x=" + x + ", y=" + y +'}';
+    }
+    
+    
 }

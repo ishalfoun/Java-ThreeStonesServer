@@ -14,7 +14,7 @@ public class ThreeStonesServer {
     private final Logger log = LoggerFactory.getLogger(
             this.getClass().getName());
     
-    private final int PORTNUM = 9999;
+    private final int PORTNUM = 50000;
     
     public void runServer()throws IOException  {
         log.info("runServer");
