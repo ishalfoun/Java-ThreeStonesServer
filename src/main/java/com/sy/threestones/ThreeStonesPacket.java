@@ -23,7 +23,7 @@ public class ThreeStonesPacket {
     //constructor
     public ThreeStonesPacket(Socket socket) {    
         
-        receiveByte = new byte[4];
+        receiveByte = new byte[5];
         try {
             in = socket.getInputStream();    
             out = socket.getOutputStream();
@@ -32,29 +32,30 @@ public class ThreeStonesPacket {
         }
     }
     
-    public void sendPacket(Stone stone, Opcode opcode) throws IOException {
+    public void sendPacket(Stone stone, Opcode opcode, int playerScore, int computerScore) throws IOException {
         byte[] byteBuffer;
         switch(opcode) {
             case ACK_GAME_START:
             {
-                byteBuffer = new byte[]{(byte)Opcode.ACK_GAME_START.getValue(), 0b0, 0b0, 0b0};
+                byteBuffer = new byte[]{(byte)Opcode.ACK_GAME_START.getValue(), 0b0, 0b0, 0b0, 0b0};
                 break;
             }
             case SERVER_PLACE:
             {
                 if (stone==null)
                     throw new IllegalArgumentException();
-                byteBuffer = new byte[]{(byte)Opcode.SERVER_PLACE.getValue(), (byte)stone.getX(), (byte)stone.getY(), 0b0};
+                byteBuffer = new byte[]{(byte)Opcode.SERVER_PLACE.getValue(), (byte)stone.getX()
+                        , (byte)stone.getY(), (byte) playerScore, (byte) computerScore};
                 break;
             }
             case REQ_PLAY_AGAIN:
             {
-                byteBuffer = new byte[]{(byte)Opcode.REQ_PLAY_AGAIN.getValue(), 0b0, 0b0, 0b0};
+                byteBuffer = new byte[]{(byte)Opcode.REQ_PLAY_AGAIN.getValue(), 0b0, 0b0, 0b0, 0b0};
                 break;   
             }
             case NOT_VALID_PLACE:
             {
-                byteBuffer = new byte[]{(byte)Opcode.NOT_VALID_PLACE.getValue(), 0b0, 0b0, 0b0};
+                byteBuffer = new byte[]{(byte)Opcode.NOT_VALID_PLACE.getValue(), 0b0, 0b0, 0b0, 0b0};
                 break;
             }
             default:
@@ -108,20 +109,24 @@ public class ThreeStonesPacket {
         Opcode opcode = Opcode.values()[(int) receiveByte[0]];
         
         log.info("Opcode canGameStart : " + opcode.name());
-//        if(opcode == Opcode.)
+
         if(opcode == Opcode.REQ_GAME_START) {
-            this.sendPacket(null, Opcode.ACK_GAME_START);
-//            this.receivePacket();
-            
+            this.sendPacket(null, Opcode.ACK_GAME_START, 0, 0);
             return true;
         }
         
         return false;
     }
     
-    public boolean playAgain() {
-//        Opcode opcode = Opcode.values()[ (int) receiveByte[0]];
-//        log.info("Opcode playAgain : " + opcode.name());
-        return opcode == Opcode.ACK_PLAY_AGAIN;
+    public boolean playAgain() throws IOException {
+        Opcode opcode = Opcode.values()[ (int) receiveByte[0]];
+        
+        log.info("Opcode playAgain : " + opcode.name());
+        
+        if(opcode == Opcode.ACK_PLAY_AGAIN) {
+            this.sendPacket(null, Opcode.ACK_GAME_START, 0, 0);            
+            return true;
+        }
+        return false;
     }
 }

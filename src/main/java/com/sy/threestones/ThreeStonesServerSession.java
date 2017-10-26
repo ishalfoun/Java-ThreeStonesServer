@@ -32,6 +32,12 @@ public class ThreeStonesServerSession {
             boolean playAgain = true;
             while(playAgain) {
                 game.playGame(packet);
+                        
+                packet.sendPacket(null, Opcode.REQ_PLAY_AGAIN, 0, 0);
+                log.debug("send REQ_PLAY_AGAIN");
+        
+                packet.receivePacket();
+                packet.receivePacket();
                 playAgain = packet.playAgain();
             }   
         }

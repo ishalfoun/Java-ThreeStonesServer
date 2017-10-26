@@ -22,8 +22,6 @@ public class ThreeStonesServerGame {
 //    Stone playerStone;
 //    Stone compStone;
     
-    private List<Stone> stones;
-    
     private ArrayList<Object> receivedPacket;
     
 //    public ThreeStonesServerGame(IsaakServerSession i) {
@@ -35,9 +33,8 @@ public class ThreeStonesServerGame {
 //    }
     
     public ThreeStonesServerGame() {
-        board = new ThreeStonesBoard(11);
-        board.fillBoardFromCSV("src/main/resources/board.csv");
-        stones = new ArrayList<>();
+//        board = new ThreeStonesBoard(11);
+//        board.fillBoardFromCSV("src/main/resources/board.csv");
     }
     
 //    public void playGame() throws IOException, Exception
@@ -68,9 +65,17 @@ public class ThreeStonesServerGame {
     public void playGame(ThreeStonesPacket packet) throws IOException {        
 
         log.info("Server Game - playGame");
+                    
+        board = new ThreeStonesBoard(11);
+        board.fillBoardFromCSV("src/main/resources/board.csv");
         
+        List<Stone> stones = new ArrayList<>();
+        final int TOTAL_STONE = 15;
+        
+        int playerScore = 0;
+        int computerScore = 0;
 //        Stone previousStone = null;
-        while(stones.size() < 15){
+        while(stones.size() < TOTAL_STONE){
             packet.receivePacket();
             Stone playerStone = packet.getStone();
             playerStone.setType(PlayerType.PLAYER);
@@ -81,25 +86,35 @@ public class ThreeStonesServerGame {
             if(stones.size() > 0)
                 playerPlayableSlots = board.getPlayableSlot(stones.get(stones.size() - 1));
             
-            for(Tile t : playerPlayableSlots) {             
-                log.debug("Player playable slots : " + t.toString());   
-            }
-            
+                        
             if(!board.placeStone(playerStone) || !isInPlayableSlots(playerPlayableSlots, playerStone)) {
-                packet.sendPacket(null, Opcode.NOT_VALID_PLACE);
+                packet.sendPacket(null, Opcode.NOT_VALID_PLACE, playerScore, computerScore);
+                
+                // debug player playableSlots
+                for(Tile t : playerPlayableSlots) {             
+                    log.debug("Player playable slots : " + t.toString());   
+                }
                 continue;
             }
+            
+            playerScore += countPointForAPosition(playerStone, playerStone.getType());
+            log.debug("player slot : " + board.getBoard()[playerStone.getX()][playerStone.getY()]);
             
             List<Tile> computerPlayableSlots = board.getPlayableSlot(playerStone);
             Stone stone = determineNextMove(computerPlayableSlots);
             stone.setType(PlayerType.COMPUTER);
             if(board.placeStone(stone)) {
-                packet.sendPacket(stone, Opcode.SERVER_PLACE);
-                stones.add(stone);
+                computerScore += countPointForAPosition(stone, stone.getType());
+                packet.sendPacket(stone, Opcode.SERVER_PLACE, playerScore, computerScore);
+                stones.add(stone);    
             }
+            
+            log.debug("computer slot : " + board.getBoard()[stone.getX()][stone.getY()]);
+            log.debug("#stones : " + stones.size());
+            
+            log.info("playerScore : " + playerScore);
+            log.info("computerScore : " + computerScore);
         }
-        
-        packet.sendPacket(null, Opcode.REQ_PLAY_AGAIN);
     }
     
     private boolean isInPlayableSlots(List<Tile> playableSlots, Stone stone) {
@@ -143,139 +158,182 @@ public class ThreeStonesServerGame {
     
     public int countPointForAPosition(Tile tile, PlayerType type) {
       
-        int topPoint = countPoint(getTopTiles(tile), type);
-        int bottomPoint = countPoint(getBottomTiles(tile), type);
-        int leftPoint = countPoint(getLeftTiles(tile), type);
-        int rightPoint = countPoint(getRightTiles(tile), type);
-        int topLeftPoint = countPoint(getTopLeftTiles(tile), type);
-        int topRightPoint = countPoint(getTopRightTiles(tile), type);
-        int bottomLeftPoint = countPoint(getBottomLeftTiles(tile), type);
-        int bottomRightPoint = countPoint(getBottomRightTiles(tile), type);
+        int topStones = numStones(getTopTiles(tile), type);
+        int bottomStones = numStones(getBottomTiles(tile), type);
         
-        return topPoint + bottomPoint + leftPoint + rightPoint
-                + topLeftPoint + topRightPoint + bottomLeftPoint + bottomRightPoint;
+        int verticalPoint = calculatePoint(topStones + bottomStones + 1);
+        
+        int leftStones = numStones(getLeftTiles(tile), type);
+        int rightStones = numStones(getRightTiles(tile), type);
+        
+        int herizontalPoint = calculatePoint(leftStones + rightStones + 1);     
+        
+        int topLeftStones = numStones(getTopLeftTiles(tile), type);
+        int bottomRightStones = numStones(getBottomRightTiles(tile), type);
+        
+        int forwardDiagonalPoint = calculatePoint(topLeftStones + bottomRightStones + 1);
+        
+        int topRightStones = numStones(getTopRightTiles(tile), type);
+        int bottomLeftStones = numStones(getBottomLeftTiles(tile), type);
+        
+        int backwardDiagonalPoint = calculatePoint(topRightStones + bottomLeftStones + 1);
+        
+        return verticalPoint + herizontalPoint + forwardDiagonalPoint + backwardDiagonalPoint;
     }
-
-    public void incrementScore() {
         
+    private int calculatePoint(int numStones) {
+        int point = 0;
+        switch(numStones) {
+            case 3:
+                point = 1;
+                break;
+            case 4:
+                point = 2;
+                break;
+            case 5:
+                point = 3;
+                break;
+        }
+        return point;
     }
-        
-    private int countPoint(Tile[] tiles, PlayerType type) {
-        int numStones = 1; // 1 because of the current stone
+    
+    private int numStones(Tile[] tiles, PlayerType type) {
+        int numStones = 0; // 1 because of the current stone
         for(int i=0; i<tiles.length; i++) {
+            log.debug("tiles[" + i + ']' + tiles[i]);
             if(tiles[i].hasStone()) {
+                log.debug("tiles[" + i + ']' + tiles[i] + "has Stone");
                 Slot slot = (Slot) tiles[i];
                 if(slot.getStone().getType() == type)
                     numStones++;
             }
         }
         
-        if(numStones == 3) return 1;
+//        log.info("numStones : " + numStones);
+//        
+//        if(numStones == 3) return 1;
         
-        return 0;
+        return numStones;
     }
     private Tile[] getTopTiles(Tile tile) {
-        Tile[] top = new Tile[2];
+        Tile[] tiles = new Tile[2];
         
-        for(int i=0; i<top.length; i++) {
-            if(board.getBoard()[tile.getX()][tile.getY()].isPlayable()) {             
-                top[i] = new Slot(tile.getX() - (i + 1), tile.getY());   
+        for(int i=0; i<tiles.length; i++) {
+            Tile nextTile = board.getBoard()[tile.getY() - (i + 1)][tile.getX()];
+            if(nextTile.isPlayable()) {             
+                tiles[i] = (Slot) nextTile;   
             } else {
-                top[i] = new Flat(tile.getX() - (i + 1), tile.getY());   
+                tiles[i] = (Flat) nextTile;   
             }
+            
+            log.debug("Top Tile : " + tiles[i]);
         }
-        return top;
+        return tiles;
     }
         
     private Tile[] getBottomTiles(Tile tile) {
-        Tile[] top = new Tile[2];
+        Tile[] tiles = new Tile[2];
         
-        for(int i=0; i<top.length; i++) {
-            if(board.getBoard()[tile.getX()][tile.getY()].isPlayable()) {             
-                top[i] = new Slot(tile.getX() + (i + 1), tile.getY());   
+        for(int i=0; i<tiles.length; i++) {
+            Tile nextTile = board.getBoard()[tile.getY() + (i + 1)][tile.getX()];
+            if(nextTile.isPlayable()) {             
+                tiles[i] = (Slot) nextTile;   
             } else {
-                top[i] = new Flat(tile.getX() + (i + 1), tile.getY());   
+                tiles[i] = (Flat) nextTile;   
             }
+            log.debug("Bottom Tile : " + tiles[i]);
         }
-        return top;
+        return tiles;
     }
     
     private Tile[] getLeftTiles(Tile tile) {
-        Tile[] top = new Tile[2];
+        Tile[] tiles = new Tile[2];
         
-        for(int i=0; i<top.length; i++) {
-            if(board.getBoard()[tile.getX()][tile.getY()].isPlayable()) {             
-                top[i] = new Slot(tile.getX(), tile.getY() - (i + 1));   
+        for(int i=0; i<tiles.length; i++) {
+            Tile nextTile = board.getBoard()[tile.getY()][tile.getX() - (i + 1)];
+            if(nextTile.isPlayable()) {             
+                tiles[i] = (Slot) nextTile;   
             } else {
-                top[i] = new Flat(tile.getX(), tile.getY() - (i + 1));   
+                tiles[i] = (Flat) nextTile;   
             }
+            log.debug("Left Tile : " + tiles[i]);
         }
-        return top;
+        return tiles;
     }
     
     private Tile[] getRightTiles(Tile tile) {
-        Tile[] top = new Tile[2];
+        Tile[] tiles = new Tile[2];
         
-        for(int i=0; i<top.length; i++) {
-            if(board.getBoard()[tile.getX()][tile.getY()].isPlayable()) {             
-                top[i] = new Slot(tile.getX(), tile.getY() + (i + 1));   
+        for(int i=0; i<tiles.length; i++) {
+            Tile nextTile = board.getBoard()[tile.getY()][tile.getX() + (i + 1)];
+            if(nextTile.isPlayable()) {             
+                tiles[i] = (Slot) nextTile;   
             } else {
-                top[i] = new Flat(tile.getX(), tile.getY() + (i + 1));   
+                tiles[i] = (Flat) nextTile;   
             }
+            log.debug("Right Tile : " + tiles[i]);
         }
-        return top;
+        return tiles;
     }
         
     private Tile[] getTopLeftTiles(Tile tile) {
-        Tile[] top = new Tile[2];
+        Tile[] tiles = new Tile[2];
         
-        for(int i=0; i<top.length; i++) {
-            if(board.getBoard()[tile.getX()][tile.getY()].isPlayable()) {             
-                top[i] = new Slot(tile.getX() - (i + 1), tile.getY() - (i + 1));   
+        for(int i=0; i<tiles.length; i++) {
+            Tile nextTile = board.getBoard()[tile.getY() - (i + 1)][tile.getX() - (i + 1)];
+            if(board.getBoard()[tile.getY()][tile.getX()].isPlayable()) {             
+                tiles[i] = (Slot) nextTile;  
             } else {
-                top[i] = new Flat(tile.getX() - (i + 1), tile.getY() - (i + 1));   
+                tiles[i] = (Flat) nextTile;   
             }
+            log.debug("TopLeft Tile : " + tiles[i]);
         }
-        return top;
+        return tiles;
     }
     
     private Tile[] getTopRightTiles(Tile tile) {
-        Tile[] top = new Tile[2];
+        Tile[] tiles = new Tile[2];
 
-        for(int i=0; i<top.length; i++) {
-            if(board.getBoard()[tile.getX()][tile.getY()].isPlayable()) {             
-                top[i] = new Slot(tile.getX() - (i + 1), tile.getY() + (i + 1));   
+        for(int i=0; i<tiles.length; i++) {
+            Tile nextTile = board.getBoard()[tile.getY() - (i + 1)][tile.getX() + (i + 1)];
+            if(nextTile.isPlayable()) {             
+                tiles[i] = (Slot) nextTile;  
             } else {
-                top[i] = new Flat(tile.getX() - (i + 1), tile.getY() + (i + 1));   
+                tiles[i] = (Flat) nextTile;   
             }
+            log.debug("TopRight Tile : " + tiles[i]);
         }
-        return top;
+        return tiles;
     }
         
     private Tile[] getBottomLeftTiles(Tile tile) {
-        Tile[] top = new Tile[2];
+        Tile[] tiles = new Tile[2];
         
-        for(int i=0; i<top.length; i++) {
-            if(board.getBoard()[tile.getX()][tile.getY()].isPlayable()) {             
-                top[i] = new Slot(tile.getX() + (i + 1), tile.getY() - (i + 1));   
+        for(int i=0; i<tiles.length; i++) {
+            Tile nextTile = board.getBoard()[tile.getY() + (i + 1)][tile.getX() - (i + 1)];
+            if(nextTile.isPlayable()) {             
+                tiles[i] = (Slot) nextTile;   
             } else {
-                top[i] = new Flat(tile.getX() + (i + 1), tile.getY() - (i + 1));   
+                tiles[i] = (Flat) nextTile;   
             }
+            log.debug("BottomLeft Tile : " + tiles[i]);
         }
-        return top;
+        return tiles;
     }
     
     private Tile[] getBottomRightTiles(Tile tile) {
-        Tile[] top = new Tile[2];
+        Tile[] tiles = new Tile[2];
 
-        for(int i=0; i<top.length; i++) {
-            if(board.getBoard()[tile.getX()][tile.getY()].isPlayable()) {             
-                top[i] = new Slot(tile.getX() + (i + 1), tile.getY() + (i + 1));   
+        for(int i=0; i<tiles.length; i++) {
+            Tile nextTile = board.getBoard()[tile.getY() + (i + 1)][tile.getX() + (i + 1)];
+            if(nextTile.isPlayable()) {             
+                tiles[i] = (Slot) nextTile;   
             } else {
-                top[i] = new Flat(tile.getX() + (i + 1), tile.getY() + (i + 1));   
+                tiles[i] = (Flat) nextTile;   
             }
+            log.debug("BottomRight Tile : " + tiles[i]);
         }
-        return top;
+        return tiles;
     }
     
 }

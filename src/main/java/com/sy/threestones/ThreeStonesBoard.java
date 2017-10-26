@@ -41,7 +41,7 @@ public class ThreeStonesBoard {
         for(int i=0; i<this.size; i++) {
             for(int j=0; j<this.size; j++) {
                 if(i == lastStonePlaced.getY() || j == lastStonePlaced.getX()) {
-                    Tile tile = board[i][j];
+                    Tile tile = board[j][i];
                     if(!tile.hasStone() && tile.isPlayable()){                     
                         playableSlot.add(tile);   
                     }
@@ -53,7 +53,7 @@ public class ThreeStonesBoard {
         if(playableSlot.size() == 0) {
             for(int i=0; i<this.size; i++) {
                 for(int j=0; j<this.size; j++) {
-                    Tile tile = board[i][j];
+                    Tile tile = board[j][i];
                     if(!tile.hasStone() && tile.isPlayable()){                     
                         playableSlot.add(tile);   
                     }
@@ -65,11 +65,11 @@ public class ThreeStonesBoard {
     
     public boolean placeStone(Stone stone) {
         
-        if(board[stone.getY()][stone.getX()].isPlayable()){
-            Slot slot = (Slot) board[stone.getY()][stone.getX()];
+        if(board[stone.getX()][stone.getY()].isPlayable()){
+            Slot slot = (Slot) board[stone.getX()][stone.getY()];
             if(!slot.hasStone()){
                 slot.placeStone(stone);
-                board[stone.getY()][stone.getX()] = slot;
+                board[stone.getX()][stone.getY()] = slot;
                 return true;
             }
         }
@@ -80,7 +80,7 @@ public class ThreeStonesBoard {
     public void fillBoardFromCSV(String pathToCSV){
         
         BufferedReader br = null;
-        String line = " ";
+        String line = "";
         int index = 0;
         
         
