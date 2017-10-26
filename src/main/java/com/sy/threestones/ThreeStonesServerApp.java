@@ -10,20 +10,15 @@ import org.slf4j.LoggerFactory;
  */
 public class ThreeStonesServerApp {
 
-//    private final static Logger log = LoggerFactory.getLogger(
-//            this.getClass().getName());
-//        
-    public static void main(String[] args) {   
+    public static void main(String[] args) throws IOException {   
 
-        System.out.println("3 Stones game");
-        
-//        log.debug("adk");
+        System.out.println("Welcome to 3 Stones game");
+
         ThreeStonesServer server = new ThreeStonesServer();
-        try {
-            server.runServer();
-        } catch (IOException ex) {
-//            log.debug("asldk");
-        }
+        server.runServer();
+
+//        System.out.println("Client address : " + server.getClientAddress());
+//        System.out.println("Connected port : " + server.getPort());
     }
     
 }

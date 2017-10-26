@@ -14,17 +14,45 @@ public class ThreeStonesServer {
     private final Logger log = LoggerFactory.getLogger(
             this.getClass().getName());
     
-    private final int PORTNUM = 50000;
+    private final int PORT = 50000;
+//    private String serverAddress;
+//    private String clientAddress;
+//    private int port;
     
     public void runServer()throws IOException  {
-        log.info("runServer");
-        ServerSocket ss = new ServerSocket(PORTNUM); 
+
+        ServerSocket ss = new ServerSocket(PORT); 
+//        serverAddress = ss.getInetAddress().getHostAddress();
+        
         while(true) {
+            log.info("runServer");
+            System.out.println("Server is running...");
+            
             Socket cs = ss.accept();
             log.info("accept client connection");
+            System.out.println("Established client connection!");
+
             ThreeStonesServerSession session = new ThreeStonesServerSession(cs);
-//            IsaakServerSession threeStonesServerSession = new IsaakServerSession(ss);
+            
+            System.out.println("Server address : " + cs.getLocalAddress().getHostAddress());
+            System.out.print("Client address : " + session.getPacket().getIpAddress());
+            System.out.println(" at port : " + session.getPacket().getPort());
+            
             session.playSession();
+            session.closeSession();
+            System.out.println("Client close connection!");
         }
     }
+//    
+//    public String getServerAddress() {
+//        return this.serverAddress;
+//    }
+//    
+//    public String getClientAddress() {
+//        return this.clientAddress;
+//    }
+//    
+//    public int getPort() {
+//        return this.port;
+//    }
 }

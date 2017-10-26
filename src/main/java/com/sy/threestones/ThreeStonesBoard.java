@@ -88,19 +88,15 @@ public class ThreeStonesBoard {
             br = new BufferedReader(new FileReader(pathToCSV));
             while ((line = br.readLine()) != null) {
                 String[] lines = line.split(",");
-                System.out.println(lines.length);
                 for(int i = 0; i < 11; i++){
                     if(lines[i].equals("f")){
                         board[index][i] = new Flat(index,i);
-                        System.out.print("Made a flat");
                     }
                     if(lines[i].equals("s")){
                         board[index][i] = new Slot(index,i);
-                        System.out.print("made a slot");
                     }
                 }
                 index++;    
-                System.out.println("new line");
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
