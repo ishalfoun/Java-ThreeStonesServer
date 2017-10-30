@@ -28,6 +28,7 @@ public class ThreeStonesServer {
             log.info("runServer");
             System.out.println("Server is running...");
             
+            
             Socket cs = ss.accept();
             log.info("accept client connection");
             System.out.println("Established client connection!");
