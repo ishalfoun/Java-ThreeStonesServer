@@ -31,6 +31,15 @@ public class ThreeStonesPacket {
         }
     }
     
+    /**
+     * Sent the packet
+     * 
+     * @param stone
+     * @param opcode
+     * @param playerScore
+     * @param computerScore
+     * @throws IOException 
+     */
     public void sendPacket(Stone stone, Opcode opcode, int playerScore
             , int computerScore) throws IOException {
         byte[] byteBuffer;
@@ -67,6 +76,7 @@ public class ThreeStonesPacket {
     }
         
     /**
+     * Receive the incoming packet and put it in the receiveByte
      * 
      * @throws IOException
      * @throws SocketException 

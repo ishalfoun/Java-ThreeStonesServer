@@ -34,6 +34,7 @@ public class ThreeStonesServer {
             System.out.println("Server is running...");
             System.out.println("Server addresss : " + address.getHostAddress());
             
+            
             Socket cs = ss.accept();
             log.info("accept client connection");
             System.out.println("Established client connection!");
