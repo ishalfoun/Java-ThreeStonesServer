@@ -87,8 +87,12 @@ public class ThreeStonesServerGame {
             stone.setType(PlayerType.COMPUTER);
             if(board.placeStone(stone)) {
                 computerScore += countPointForAPosition(stone, stone.getType());
-                packet.sendPacket(stone, Opcode.SERVER_PLACE, playerScore, computerScore);
-                computerStones.add(stone);    
+                if(computerStones.size() < TOTAL_STONE - 1) {                    
+                    packet.sendPacket(stone, Opcode.SERVER_PLACE, playerScore, computerScore);                    
+                } else {
+                    packet.sendPacket(stone, Opcode.REQ_PLAY_AGAIN, playerScore, computerScore);
+                }
+                computerStones.add(stone);   
             }
             
             log.debug("computer slot : " + board.getBoard()[stone.getX()][stone.getY()]);
