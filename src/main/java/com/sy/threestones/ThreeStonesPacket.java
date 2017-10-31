@@ -31,7 +31,8 @@ public class ThreeStonesPacket {
         }
     }
     
-    public void sendPacket(Stone stone, Opcode opcode, int playerScore, int computerScore) throws IOException {
+    public void sendPacket(Stone stone, Opcode opcode, int playerScore
+            , int computerScore) throws IOException {
         byte[] byteBuffer;
         switch(opcode) {
             case ACK_GAME_START:
@@ -65,6 +66,11 @@ public class ThreeStonesPacket {
         log.info("send Packet");
     }
         
+    /**
+     * 
+     * @throws IOException
+     * @throws SocketException 
+     */
     public void receivePacket() throws IOException, SocketException {
         log.info("receive packet");
 
@@ -79,22 +85,44 @@ public class ThreeStonesPacket {
         }       
     }
     
+    /**
+     * Get client IP address
+     * @return 
+     */
     public String getIpAddress() {
         return this.socket.getInetAddress().getHostAddress();
     }
     
+    /**
+     * Get client port
+     * @return 
+     */
     public int getPort() {
         return this.socket.getPort();
     }
     
+    /**
+     * Get local Port
+     * @return 
+     */
     public int getLocalPort() {
         return this.socket.getLocalPort();
     }
     
+    /**
+     * Close the socket
+     * 
+     * @throws IOException 
+     */
     public void closeConnection() throws IOException {
         this.socket.close();
     }
     
+    /**
+     * Get the Stone from the packet that the server received
+     * @return
+     * @throws IOException 
+     */
     public Stone getStone() throws IOException {
         int x = (int) receiveByte[1];
         int y = (int) receiveByte[2];
@@ -103,6 +131,10 @@ public class ThreeStonesPacket {
         return stone;
     }
     
+    /**
+     * Get the Opcode from the packet that server received
+     * @return 
+     */
     public Opcode getOpcode() {        
         Opcode opcode = Opcode.values()[ (int) receiveByte[0]];
         
@@ -110,6 +142,13 @@ public class ThreeStonesPacket {
         return opcode;        
     }
     
+    /**
+     * Check if the server receive REQ_GAME_START, if yes, send back
+     * ACK_GAME_START and return true, otherwise return false
+     * 
+     * @return
+     * @throws IOException 
+     */
     public boolean canGameStart() throws IOException {
         Opcode opcode = Opcode.values()[(int) receiveByte[0]];
         
@@ -123,6 +162,13 @@ public class ThreeStonesPacket {
         return false;
     }
     
+    /**
+     * Check if the client send back ACK_PLAY_AGAIN, if yes, send back 
+     * ACK_GAME_START and return true, otherwise return false
+     * 
+     * @return
+     * @throws IOException 
+     */
     public boolean playAgain() throws IOException {
         Opcode opcode = Opcode.values()[ (int) receiveByte[0]];
         

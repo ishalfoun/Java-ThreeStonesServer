@@ -123,7 +123,7 @@ public class ThreeStonesServerGame {
      * the best score. If there is no score, it return random stone that
      * in the list playable tiles.
      * 
-     * @param playableTiles - a list of tiles that must a slot that has no stone
+     * @param playableTiles - a list of tiles that must be a slot that has no stone
      * @return 
      */
     public Stone determineNextMove(List<Tile> playableTiles) {
@@ -133,27 +133,26 @@ public class ThreeStonesServerGame {
         
         int point = 0;
         int computerStones = 0;
-        int playerStones = 0;
+        int playerPoint = 0;
         for(Tile tile : playableTiles) {
             int newPoint = countPointForAPosition(tile, PlayerType.COMPUTER);
             int newComStone = countStonesAroundATile(tile, PlayerType.COMPUTER);
-            int newPlayerStone = countStonesAroundATile(tile, PlayerType.PLAYER);
+            int newPlayerPoint = countPointForAPosition(tile, PlayerType.PLAYER);
 //            log.debug("newPoint : " + newPoint);
-            if(newPoint > point || newPlayerStone > playerStones || newComStone > computerStones){                 
+            if(newPoint > point || newPlayerPoint > playerPoint || newComStone > computerStones){                 
                 log.debug("inside newPoint > point");
                 point = newPoint;
-                playerStones = newPlayerStone;
+                playerPoint = newPlayerPoint;
                 computerStones = newComStone;
                 Slot slot = (Slot) tile;
                 stone = new Stone(slot.getX(), slot.getY(), PlayerType.COMPUTER);
                 
-                log.debug("player stone : " + playerStones);
+                log.debug("player stone : " + playerPoint);
                 log.debug("computer stone : " + computerStones);
-//                return stone;
             }            
         }
         
-        if(point == 0 && playerStones == 0 && computerStones == 0) {
+        if(point == 0 && playerPoint == 0 && computerStones == 0) {
             log.debug("inside point == 0");
             int random = (int) (Math.random() * playableTiles.size());
             Slot slot = (Slot) playableTiles.get(random);
@@ -166,7 +165,7 @@ public class ThreeStonesServerGame {
     } 
     
     /**
-     * 
+     * Count all the possible point of the tile
      * @param tile
      * @param type
      * @return 
@@ -197,6 +196,13 @@ public class ThreeStonesServerGame {
         return verticalPoint + herizontalPoint + forwardDiagonalPoint + backwardDiagonalPoint;
     }
     
+    /**
+     * Count the stones of the same type around the tile. This will count
+     * 2 tiles horizontal, vertical and diagonal around the tile.
+     * @param tile
+     * @param type
+     * @return 
+     */
     private int countStonesAroundATile(Tile tile, PlayerType type) {
               
         int topStones = countStone(getTopTiles(tile), type);
@@ -215,6 +221,11 @@ public class ThreeStonesServerGame {
                 + bottomRightStones + topRightStones + bottomLeftStones;
     }
         
+    /**
+     * 1 point for 3 stones, 2 point for 4 stones and 3 point for 5 stones
+     * @param numStones
+     * @return 
+     */
     private int calculatePoint(int numStones) {
         int point = 0;
         switch(numStones) {
@@ -231,6 +242,12 @@ public class ThreeStonesServerGame {
         return point;
     }
     
+    /**
+     * Count stones of the same type that are inside the tiles[]
+     * @param tiles[]
+     * @param type 
+     * @return 
+     */
     private int countStone(Tile[] tiles, PlayerType type) {
         int numStones = 0; // 1 because of the current stone
         for(int i=0; i<tiles.length; i++) {
@@ -246,6 +263,11 @@ public class ThreeStonesServerGame {
         return numStones;
     }
     
+    /**
+     * Get 2 tiles above this
+     * @param tile
+     * @return 
+     */
     private Tile[] getTopTiles(Tile tile) {
         Tile[] tiles = new Tile[2];
         
@@ -261,7 +283,12 @@ public class ThreeStonesServerGame {
         }
         return tiles;
     }
-        
+       
+    /**
+     * Get 2 tiles below this
+     * @param tile
+     * @return 
+     */
     private Tile[] getBottomTiles(Tile tile) {
         Tile[] tiles = new Tile[2];
         
@@ -277,6 +304,11 @@ public class ThreeStonesServerGame {
         return tiles;
     }
     
+    /**
+     * Get 2 left tiles from this
+     * @param tile
+     * @return 
+     */
     private Tile[] getLeftTiles(Tile tile) {
         Tile[] tiles = new Tile[2];
         
@@ -292,6 +324,11 @@ public class ThreeStonesServerGame {
         return tiles;
     }
     
+    /**
+     * Get 2 right tiles from this
+     * @param tile
+     * @return 
+     */
     private Tile[] getRightTiles(Tile tile) {
         Tile[] tiles = new Tile[2];
         
@@ -307,6 +344,11 @@ public class ThreeStonesServerGame {
         return tiles;
     }
         
+    /**
+     * Get 2 top left tiles from this
+     * @param tile
+     * @return 
+     */
     private Tile[] getTopLeftTiles(Tile tile) {
         Tile[] tiles = new Tile[2];
         
@@ -322,6 +364,11 @@ public class ThreeStonesServerGame {
         return tiles;
     }
     
+    /**
+     * Get 2 top right tiles from this
+     * @param tile
+     * @return 
+     */
     private Tile[] getTopRightTiles(Tile tile) {
         Tile[] tiles = new Tile[2];
 
@@ -336,7 +383,12 @@ public class ThreeStonesServerGame {
         }
         return tiles;
     }
-        
+     
+    /**
+     * Get 2 bottom left tiles from this
+     * @param tile
+     * @return 
+     */
     private Tile[] getBottomLeftTiles(Tile tile) {
         Tile[] tiles = new Tile[2];
         
@@ -352,6 +404,11 @@ public class ThreeStonesServerGame {
         return tiles;
     }
     
+    /**
+     * Get 2 bottom right tiles from this
+     * @param tile
+     * @return 
+     */
     private Tile[] getBottomRightTiles(Tile tile) {
         Tile[] tiles = new Tile[2];
 
