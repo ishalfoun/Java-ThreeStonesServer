@@ -40,26 +40,15 @@ public class ThreeStonesServer {
             System.out.println("Established client connection!");
 
             ThreeStonesServerSession session = new ThreeStonesServerSession(cs);
-            
-//            System.out.println("Server address : " + cs.getLocalAddress().getHostAddress());
-            System.out.print("Client address : " + session.getPacket().getIpAddress());
-            System.out.println(" at port : " + session.getPacket().getPort());
+
+            System.out.print("Client address : "
+                    + session.getPacket().getIpAddress());
+            System.out.println(" at port : "
+                    + session.getPacket().getPort());
             
             session.playSession();
             session.closeSession();
             System.out.println("Client close connection!");
         }
     }
-//    
-//    public String getServerAddress() {
-//        return this.serverAddress;
-//    }
-//    
-//    public String getClientAddress() {
-//        return this.clientAddress;
-//    }
-//    
-//    public int getPort() {
-//        return this.port;
-//    }
 }

@@ -16,9 +16,6 @@ public class ThreeStonesServerApp {
 
         ThreeStonesServer server = new ThreeStonesServer();
         server.runServer();
-
-//        System.out.println("Client address : " + server.getClientAddress());
-//        System.out.println("Connected port : " + server.getPort());
     }
     
 }

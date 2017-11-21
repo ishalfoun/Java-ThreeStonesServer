@@ -23,11 +23,11 @@ public class ThreeStonesServerSession {
     }
     
     /**
-     * Check if the game can start - to start a the client must sent REQ_GAME_START,
-     * then server sent back ACK_GAME_START. When the game end, the server
-     * send REQ_PLAY_AGAIN, if the client send back ACK_PLAY_AGAIN, the game will
-     * restart, else the game will end.
-     * 
+     * Check if the game can start - to start a the client must sent
+     * REQ_GAME_START, then server sent back ACK_GAME_START. When the game end,
+     * the server send REQ_PLAY_AGAIN, if the client send back ACK_PLAY_AGAIN,
+     * the game will restart, else the game will end.
+       * 
      * @throws IOException 
      */
     public void playSession() throws IOException {

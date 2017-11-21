@@ -56,27 +56,29 @@ public class ThreeStonesServerGame {
             
             List<Tile> playerPlayableSlots = new ArrayList<>();
             if(computerStones.size() > 0)
-                playerPlayableSlots = board.getPlayableSlot(computerStones.get(computerStones.size() - 1));
+                playerPlayableSlots = board.getPlayableSlot(computerStones
+                        .get(computerStones.size() - 1));
             
             // debug player playableSlots
 //            for(Tile t : playerPlayableSlots) {             
 //                log.debug("Player playable slots : " + t.toString());   
 //            }            
             
-            if(!isInPlayableSlots(playerPlayableSlots, playerStone) || !board.placeStone(playerStone) ) {
-                packet.sendPacket(null, Opcode.NOT_VALID_PLACE, playerScore, computerScore);
-                
-                // debug player playableSlots
-//                for(Tile t : playerPlayableSlots) {             
-//                    log.debug("Player playable slots : " + t.toString());   
-//                }
+            if (!isInPlayableSlots(playerPlayableSlots, playerStone)
+                    || !board.placeStone(playerStone)) {
+                packet.sendPacket(null, Opcode.NOT_VALID_PLACE, playerScore,
+                         computerScore);
+
                 continue;
             }
             
-            playerScore += countPointForAPosition(playerStone, playerStone.getType());
-            log.debug("player slot : " + board.getBoard()[playerStone.getX()][playerStone.getY()]);
+            playerScore += countPointForAPosition(playerStone,
+                     playerStone.getType());
+            log.debug("player slot : "
+                    + board.getBoard()[playerStone.getX()][playerStone.getY()]);
             
-            List<Tile> computerPlayableSlots = board.getPlayableSlot(playerStone);
+            List<Tile> computerPlayableSlots
+                    = board.getPlayableSlot(playerStone);
             
             // Debug computer playable slots
              for(Tile tile : computerPlayableSlots) {
@@ -88,14 +90,17 @@ public class ThreeStonesServerGame {
             if(board.placeStone(stone)) {
                 computerScore += countPointForAPosition(stone, stone.getType());
                 if(computerStones.size() < TOTAL_STONE - 1) {                    
-                    packet.sendPacket(stone, Opcode.SERVER_PLACE, playerScore, computerScore);                    
+                    packet.sendPacket(stone, Opcode.SERVER_PLACE, playerScore,
+                             computerScore);
                 } else {
-                    packet.sendPacket(stone, Opcode.REQ_PLAY_AGAIN, playerScore, computerScore);
+                    packet.sendPacket(stone, Opcode.REQ_PLAY_AGAIN, playerScore,
+                             computerScore);
                 }
                 computerStones.add(stone);   
             }
             
-            log.debug("computer slot : " + board.getBoard()[stone.getX()][stone.getY()]);
+            log.debug("computer slot : "
+                    + board.getBoard()[stone.getX()][stone.getY()]);
             log.debug("#stones : " + computerStones.size());
             
             log.info("playerScore : " + playerScore);
@@ -127,7 +132,8 @@ public class ThreeStonesServerGame {
      * the best score. If there is no score, it return random stone that
      * in the list playable tiles.
      * 
-     * @param playableTiles - a list of tiles that must be a slot that has no stone
+     * @param playableTiles - a list of tiles that must be a slot that has no
+     * stone
      * @return 
      */
     public Stone determineNextMove(List<Tile> playableTiles) {
@@ -141,15 +147,18 @@ public class ThreeStonesServerGame {
         for(Tile tile : playableTiles) {
             int newPoint = countPointForAPosition(tile, PlayerType.COMPUTER);
             int newComStone = countStonesAroundATile(tile, PlayerType.COMPUTER);
-            int newPlayerPoint = countPointForAPosition(tile, PlayerType.PLAYER);
+            int newPlayerPoint = countPointForAPosition(tile,
+                     PlayerType.PLAYER);
 //            log.debug("newPoint : " + newPoint);
-            if(newPoint > point || newPlayerPoint > playerPoint || newComStone > computerStones){                 
+            if (newPoint > point || newPlayerPoint > playerPoint
+                    || newComStone > computerStones) {
                 log.debug("inside newPoint > point");
                 point = newPoint;
                 playerPoint = newPlayerPoint;
                 computerStones = newComStone;
                 Slot slot = (Slot) tile;
-                stone = new Stone(slot.getX(), slot.getY(), PlayerType.COMPUTER);
+                stone = new Stone(slot.getX(), slot.getY(),
+                         PlayerType.COMPUTER);
                 
                 log.debug("player stone : " + playerPoint);
                 log.debug("computer stone : " + computerStones);
@@ -190,14 +199,17 @@ public class ThreeStonesServerGame {
         int topLeftStones = countStone(getTopLeftTiles(tile), type);
         int bottomRightStones = countStone(getBottomRightTiles(tile), type);
         
-        int forwardDiagonalPoint = calculatePoint(topLeftStones + bottomRightStones + 1);
+        int forwardDiagonalPoint = calculatePoint(topLeftStones
+                + bottomRightStones + 1);
         
         int topRightStones = countStone(getTopRightTiles(tile), type);
         int bottomLeftStones = countStone(getBottomLeftTiles(tile), type);
         
-        int backwardDiagonalPoint = calculatePoint(topRightStones + bottomLeftStones + 1);
+        int backwardDiagonalPoint = calculatePoint(topRightStones
+                + bottomLeftStones + 1);
         
-        return verticalPoint + herizontalPoint + forwardDiagonalPoint + backwardDiagonalPoint;
+        return verticalPoint + herizontalPoint + forwardDiagonalPoint
+                + backwardDiagonalPoint;
     }
     
     /**
@@ -221,8 +233,9 @@ public class ThreeStonesServerGame {
         int topRightStones = countStone(getTopRightTiles(tile), type);
         int bottomLeftStones = countStone(getBottomLeftTiles(tile), type);
 
-        return topStones + bottomStones + leftStones + rightStones + topLeftStones
-                + bottomRightStones + topRightStones + bottomLeftStones;
+        return topStones + bottomStones + leftStones + rightStones
+                + topLeftStones + bottomRightStones + topRightStones
+                + bottomLeftStones;
     }
         
     /**
@@ -276,7 +289,8 @@ public class ThreeStonesServerGame {
         Tile[] tiles = new Tile[2];
         
         for(int i=0; i<tiles.length; i++) {
-            Tile nextTile = board.getBoard()[tile.getX()][tile.getY() - (i + 1)];
+            Tile nextTile = board.getBoard()[tile.getX()][tile.getY()
+                    - (i + 1)];
             if(nextTile.isPlayable()) {             
                 tiles[i] = (Slot) nextTile;   
             } else {
@@ -297,7 +311,8 @@ public class ThreeStonesServerGame {
         Tile[] tiles = new Tile[2];
         
         for(int i=0; i<tiles.length; i++) {
-            Tile nextTile = board.getBoard()[tile.getX()][tile.getY() + (i + 1)];
+            Tile nextTile = board.getBoard()[tile.getX()][tile.getY()
+                    + (i + 1)];
             if(nextTile.isPlayable()) {             
                 tiles[i] = (Slot) nextTile;   
             } else {
@@ -317,7 +332,8 @@ public class ThreeStonesServerGame {
         Tile[] tiles = new Tile[2];
         
         for(int i=0; i<tiles.length; i++) {
-            Tile nextTile = board.getBoard()[tile.getX() - (i + 1)][tile.getY()];
+            Tile nextTile = board.getBoard()[tile.getX()
+                    - (i + 1)][tile.getY()];
             if(nextTile.isPlayable()) {             
                 tiles[i] = (Slot) nextTile;   
             } else {
@@ -337,7 +353,8 @@ public class ThreeStonesServerGame {
         Tile[] tiles = new Tile[2];
         
         for(int i=0; i<tiles.length; i++) {
-            Tile nextTile = board.getBoard()[tile.getX() + (i + 1)][tile.getY()];
+            Tile nextTile = board.getBoard()[tile.getX()
+                    + (i + 1)][tile.getY()];
             if(nextTile.isPlayable()) {             
                 tiles[i] = (Slot) nextTile;   
             } else {
@@ -357,7 +374,8 @@ public class ThreeStonesServerGame {
         Tile[] tiles = new Tile[2];
         
         for(int i=0; i<tiles.length; i++) {
-            Tile nextTile = board.getBoard()[tile.getX() - (i + 1)][tile.getY() - (i + 1)];
+            Tile nextTile = board.getBoard()[tile.getX()
+                    - (i + 1)][tile.getY() - (i + 1)];
             if(nextTile.isPlayable()) {             
                 tiles[i] = (Slot) nextTile;  
             } else {
@@ -377,7 +395,8 @@ public class ThreeStonesServerGame {
         Tile[] tiles = new Tile[2];
 
         for(int i=0; i<tiles.length; i++) {
-            Tile nextTile = board.getBoard()[tile.getX() + (i + 1)][tile.getY() - (i + 1)];
+            Tile nextTile = board.getBoard()[tile.getX()
+                    + (i + 1)][tile.getY() - (i + 1)];
             if(nextTile.isPlayable()) {             
                 tiles[i] = (Slot) nextTile;  
             } else {
@@ -397,7 +416,8 @@ public class ThreeStonesServerGame {
         Tile[] tiles = new Tile[2];
         
         for(int i=0; i<tiles.length; i++) {
-            Tile nextTile = board.getBoard()[tile.getX() - (i + 1)][tile.getY() + (i + 1)];
+            Tile nextTile = board.getBoard()[tile.getX() - (i + 1)][tile.getY()
+                    + (i + 1)];
             if(nextTile.isPlayable()) {             
                 tiles[i] = (Slot) nextTile;   
             } else {
@@ -417,7 +437,8 @@ public class ThreeStonesServerGame {
         Tile[] tiles = new Tile[2];
 
         for(int i=0; i<tiles.length; i++) {
-            Tile nextTile = board.getBoard()[tile.getX() + (i + 1)][tile.getY() + (i + 1)];
+            Tile nextTile = board.getBoard()[tile.getX() + (i + 1)][tile.getY()
+                    + (i + 1)];
             if(nextTile.isPlayable()) {             
                 tiles[i] = (Slot) nextTile;   
             } else {

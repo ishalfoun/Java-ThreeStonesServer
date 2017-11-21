@@ -46,25 +46,29 @@ public class ThreeStonesPacket {
         switch(opcode) {
             case ACK_GAME_START:
             {
-                byteBuffer = new byte[]{(byte)Opcode.ACK_GAME_START.getValue(), 0b0, 0b0, 0b0, 0b0};
+                byteBuffer = new byte[]{(byte) Opcode.ACK_GAME_START.getValue(),
+                     0b0, 0b0, 0b0, 0b0};
                 break;
             }
             case SERVER_PLACE:
             {
                 if (stone==null)
                     throw new IllegalArgumentException();
-                byteBuffer = new byte[]{(byte)Opcode.SERVER_PLACE.getValue(), (byte)stone.getX()
-                        , (byte)stone.getY(), (byte) playerScore, (byte) computerScore};
+                byteBuffer = new byte[]{(byte) Opcode.SERVER_PLACE.getValue(),
+                     (byte) stone.getX(), (byte) stone.getY(),
+                     (byte) playerScore, (byte) computerScore};
                 break;
             }
             case REQ_PLAY_AGAIN:
             {
-                byteBuffer = new byte[]{(byte)Opcode.REQ_PLAY_AGAIN.getValue(), 0b0, 0b0, 0b0, 0b0};
+                byteBuffer = new byte[]{(byte) Opcode.REQ_PLAY_AGAIN.getValue(),
+                     0b0, 0b0, 0b0, 0b0};
                 break;   
             }
             case NOT_VALID_PLACE:
             {
-                byteBuffer = new byte[]{(byte)Opcode.NOT_VALID_PLACE.getValue(), 0b0, 0b0, 0b0, 0b0};
+                byteBuffer = new byte[]{(byte) Opcode.NOT_VALID_PLACE.getValue(),
+                     0b0, 0b0, 0b0, 0b0};
                 break;
             }
             default:
@@ -88,7 +92,8 @@ public class ThreeStonesPacket {
         int bytesRcvd;        // Bytes received in last read
         
         while (totalBytesRcvd < receiveByte.length) {
-          if ((bytesRcvd = in.read(receiveByte, totalBytesRcvd, receiveByte.length - totalBytesRcvd)) == -1)
+            if ((bytesRcvd = in.read(receiveByte, totalBytesRcvd,
+                     receiveByte.length - totalBytesRcvd)) == -1)
             throw new SocketException("Connection closed prematurely");
             totalBytesRcvd += bytesRcvd;
             log.debug("totalByteRcvd : " + totalBytesRcvd);
