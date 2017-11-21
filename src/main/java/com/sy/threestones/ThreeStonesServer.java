@@ -40,15 +40,20 @@ public class ThreeStonesServer {
             System.out.println("Established client connection!");
 
             ThreeStonesServerSession session = new ThreeStonesServerSession(cs);
+            
+            Thread th = new Thread(session);
+            th.start();
 
+            //this stuff went to run in the runnable object
+            /*
             System.out.print("Client address : "
                     + session.getPacket().getIpAddress());
             System.out.println(" at port : "
                     + session.getPacket().getPort());
             
             session.playSession();
-            session.closeSession();
-            System.out.println("Client close connection!");
+            session.closeSession();            
+            System.out.println("Client close connection!");*/
         }
     }
 }

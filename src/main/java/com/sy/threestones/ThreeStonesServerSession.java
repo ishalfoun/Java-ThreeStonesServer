@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author KimHyonh
  */
-public class ThreeStonesServerSession {
+public class ThreeStonesServerSession implements Runnable{
     
     private final Logger log = LoggerFactory.getLogger(
             this.getClass().getName());
@@ -20,6 +20,22 @@ public class ThreeStonesServerSession {
     public ThreeStonesServerSession(Socket socket) {
 //        this.socket = socket;
         packet = new ThreeStonesPacket(socket);
+    }
+    
+    public void run(){
+        try{
+            playSession();
+            System.out.print("Client address : "
+                    + this.getPacket().getIpAddress());
+            System.out.println(" at port : "
+                    + this.getPacket().getPort());
+            
+            this.playSession();
+            this.closeSession();
+        }catch(IOException ioe){
+            log.error("Got an io exeption from playSession : " + ioe);
+        }
+        
     }
     
     /**
